@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0b0f1a">
+<title>Code Learner</title>
+<style>
+:root{--bg:#0b0f1a;--card:#141b2d;--line:#222d47;--txt:#e8ecf7;--mut:#8b96b3;--a:#6366F1;--b:#06B6D4;--ok:#34d399;--bad:#f87171;--py:linear-gradient(135deg,#3b82f6,#fbbf24);--sq:linear-gradient(135deg,#06B6D4,#6366F1)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:radial-gradient(circle at top,#1b1640,var(--bg) 60%);color:var(--txt);padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+#top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:12px 16px;backdrop-filter:blur(12px);background:rgba(11,15,26,.75);border-bottom:1px solid var(--line)}
+#top .title{font-weight:800;flex:1;color:#c7d2fe}
+#top .back{background:none;border:0;color:var(--b);font-weight:700;font-size:16px;cursor:pointer;padding:4px 6px 4px 0}
+#top .back[hidden]{display:none}
+.xp{font-size:14px;color:var(--mut);font-weight:600}
+main{max-width:920px;margin:0 auto;padding:16px}
+/* splash */
+.splash{min-height:calc(100vh - 120px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer;padding:12px}
+.logo-wrap{width:100%;max-width:560px}
+.logo-wrap svg{width:100%;height:auto;display:block}
+.appname{font-size:34px;margin:18px 0 4px;background:linear-gradient(90deg,#60a5fa,#c084fc,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}
+.splash p{color:var(--mut);margin:0 0 22px}
+.start{border:0;border-radius:999px;padding:14px 30px;font-size:16px;font-weight:700;color:#fff;background:var(--a);cursor:pointer}
+/* cards */
+.grid{display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:640px){.grid{grid-template-columns:1fr 1fr}}
+.tile{border-radius:20px;padding:20px;color:#fff;cursor:pointer;background:var(--py);border:1px solid rgba(255,255,255,.08);transition:transform .15s}
+.tile.sq{background:var(--sq)}
+.tile:hover,.tile:active{transform:translateY(-2px)}
+.tile h2{margin:0 0 6px;font-size:24px}
+.tile p{margin:0;opacity:.92;font-size:14px}
+.tile .prog{margin-top:12px;font-size:13px;font-weight:700;opacity:.95}
+.lvl{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;margin-bottom:12px}
+.lvl:hover,.lvl:active{border-color:var(--a)}
+.lvl b{font-size:18px}
+.lvl span{display:block;color:var(--mut);font-size:13px;margin-top:4px}
+.lvl em{font-style:normal;font-size:20px;color:var(--b)}
+.hero{border-radius:20px;padding:20px;background:var(--py);color:#fff;margin-bottom:16px}
+.hero.sq{background:var(--sq)}
+.hero h2{margin:0 0 4px;font-size:22px}
+.hero p{margin:0;opacity:.92;font-size:14px}
+.bar{height:8px;background:rgba(0,0,0,.25);border-radius:99px;overflow:hidden;margin:12px 0 6px}
+.bar i{display:block;height:100%;background:#fff;width:0;transition:width .4s}
+/* topics */
+.topic{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;cursor:pointer;transition:transform .15s,border-color .15s}
+.topic:hover,.topic:active{transform:translateY(-2px);border-color:var(--a)}
+.topic.locked{opacity:.65;cursor:not-allowed}
+.topic.locked:hover,.topic.locked:active{transform:none;border-color:var(--line)}
+.topic .row{display:flex;gap:12px;align-items:center}
+.num{width:44px;height:44px;flex:0 0 44px;border-radius:14px;display:grid;place-items:center;font-weight:800;color:#fff;background:var(--a)}
+.topic.done .num{background:var(--ok)}
+.topic.locked .num{background:#334155}
+.topic b{display:block;font-size:16px}
+.ex{margin:10px 0 0;padding-left:20px;color:var(--mut);font-size:13.5px;line-height:1.55}
+.ex li{margin-bottom:2px}
+.tag{display:inline-block;margin-top:8px;font-size:12px;color:#fbbf24;font-weight:600}
+/* lesson */
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-top:14px}
+.card h2{margin:6px 0 8px;font-size:22px}
+.card h3{margin:0 0 6px}
+.pill{display:inline-block;font-size:12px;padding:3px 10px;border-radius:99px;background:var(--line);color:var(--mut);font-weight:600}
+.card .ex{color:var(--txt);font-size:15px;margin-bottom:6px}
+.pre{background:#070a13;border:1px solid var(--line);border-radius:14px;padding:14px;overflow-x:auto;font:14px/1.6 ui-monospace,Menlo,Consolas,monospace;color:#c7d2fe;white-space:pre}
+.opt{display:block;width:100%;text-align:left;margin:8px 0;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#0f1526;color:var(--txt);font:15px ui-monospace,Menlo,Consolas,monospace;cursor:pointer}
+.opt:disabled{opacity:.6;cursor:not-allowed}
+.opt.ok{border-color:var(--ok);background:rgba(52,211,153,.12)}
+.opt.bad{border-color:var(--bad);background:rgba(248,113,113,.12)}
+.fb{margin-top:10px;font-size:14px;color:var(--mut);min-height:20px}
+.nextbtn{margin-top:12px;width:100%;padding:13px;border:0;border-radius:12px;background:var(--a);color:#fff;font-weight:700;font-size:16px;cursor:pointer;display:none}
+.auth{display:flex;flex-direction:column;align-items:center;text-align:center;padding:8px 4px 40px}
+.auth .logo-wrap{width:100%;max-width:520px}
+.auth .logo-wrap svg{width:100%;height:auto;display:block}
+.auth .appname{font-size:30px;margin:14px 0 2px}
+.sub{color:var(--mut);margin:0 0 4px}
+.signup{width:100%;max-width:420px;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-top:14px}
+.signup label{display:block;font-size:13px;color:var(--mut);font-weight:600;margin-bottom:14px}
+.signup input{width:100%;margin-top:6px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0f1526;color:var(--txt);font-size:15px;outline:none}
+.signup input:focus{border-color:var(--a)}
+.pw{display:flex;gap:8px}
+.pw input{flex:1;min-width:0}
+.pw button{border:1px solid var(--line);background:#0f1526;color:var(--b);border-radius:12px;padding:0 12px;font-weight:700;cursor:pointer}
+.meter{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin:-4px 0 6px}
+.meter i{display:block;height:100%;width:0;transition:width .3s,background .3s}
+.hint{color:var(--mut);font-size:12px}
+.signup .start{width:100%;margin-top:14px}
+.msg{margin-top:12px;font-size:14px;color:var(--ok);min-height:20px;text-align:left}
+.msg.err{color:var(--bad)}
+.flow{list-style:none;padding:0;margin:14px 0 0;width:100%;max-width:420px;text-align:left;font-size:13px;color:var(--mut)}
+.flow li{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--a);border-radius:10px;padding:9px 12px;margin-bottom:8px;line-height:1.45}
+.flow li.note{border-left-color:#fbbf24;color:#fde68a}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:24px 16px 40px}
+</style>
+</head>
+<body>
+<div id="top">
+  <button class="back" id="back" onclick="goBack()" hidden>← Back</button>
+  <span class="title" id="title">Code Learner</span>
+  <span class="xp" id="xp">⭐ 0 XP</span>
+</div>
+<main><div id="app"></div></main>
+<footer>Code Learner · Python &amp; SQL · Beginner → Intermediate → Advanced</footer>
+
+<script>
+const LOGO = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1300 400" role="img" aria-label="Code Learners robot logo">
+<defs>
+<linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1E293B"/><stop offset="100%" stop-color="#334155"/></linearGradient>
+<linearGradient id="glow" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#6366F1"/><stop offset="100%" stop-color="#06B6D4"/></linearGradient>
+<linearGradient id="wordGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#6366F1"/><stop offset="100%" stop-color="#06B6D4"/></linearGradient>
+<filter id="glowFx" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<g transform="translate(40,60) scale(0.75)">
+<line x1="240" y1="58" x2="240" y2="84" stroke="#475569" stroke-width="6" stroke-linecap="round"/>
+<circle cx="240" cy="50" r="10" fill="#06B6D4" filter="url(#glowFx)"/>
+<rect x="170" y="84" width="140" height="110" rx="28" fill="url(#bodyGrad)"/>
+<circle cx="208" cy="130" r="13" fill="#22D3EE" filter="url(#glowFx)"/>
+<circle cx="272" cy="130" r="13" fill="#22D3EE" filter="url(#glowFx)"/>
+<path d="M212 170 Q240 186 268 170" fill="none" stroke="#67E8F9" stroke-width="5" stroke-linecap="round"/>
+<polyline points="262,88 252,104 266,116 254,132 262,146" fill="none" stroke="#F97316" stroke-width="4" stroke-dasharray="6 4" stroke-linecap="round"/>
+<g filter="url(#glowFx)"><rect x="244" y="98" width="34" height="50" rx="8" fill="url(#glow)" opacity="0.9"/><text x="261" y="130" text-anchor="middle" font-family="'Fira Code', Consolas, monospace" font-size="18" font-weight="700" fill="#FFFFFF">&lt;/&gt;</text></g>
+<rect x="150" y="214" width="180" height="130" rx="26" fill="url(#bodyGrad)"/>
+<rect x="180" y="238" width="120" height="66" rx="10" fill="#0F172A"/>
+<text x="190" y="256" font-family="'Fira Code', Consolas, monospace" font-size="12" fill="#A5B4FC">fix() {</text>
+<text x="200" y="272" font-family="'Fira Code', Consolas, monospace" font-size="12" fill="#67E8F9">heal(self);</text>
+<text x="190" y="288" font-family="'Fira Code', Consolas, monospace" font-size="12" fill="#A5B4FC">}</text>
+<text x="240" y="330" text-anchor="middle" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="800" letter-spacing="0.5" fill="#E2E8F0">Learn to Level UP</text>
+<path d="M330 240 Q364 232 372 200" fill="none" stroke="#475569" stroke-width="22" stroke-linecap="round"/>
+<g transform="rotate(35 380 178)"><rect x="376" y="150" width="8" height="58" rx="4" fill="#94A3B8"/><circle cx="380" cy="150" r="13" fill="none" stroke="#94A3B8" stroke-width="8"/></g>
+<g filter="url(#glowFx)"><rect x="390" y="60" width="150" height="62" rx="14" fill="#0F172A" stroke="url(#glow)" stroke-width="2.5"/><text x="406" y="88" font-family="'Fira Code', Consolas, monospace" font-size="15" fill="#A5B4FC">if (broken)</text><text x="406" y="109" font-family="'Fira Code', Consolas, monospace" font-size="15" fill="#67E8F9">repair();</text></g>
+<path d="M352 96 L372 112 L366 88 Z" fill="#0F172A"/>
+</g>
+<text x="440" y="200" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="104" font-weight="800" letter-spacing="-2"><tspan fill="#38BDF8">Code </tspan><tspan fill="url(#wordGrad)">Learners</tspan></text>
+</svg>`;
+
+const DATA = {
+python: {
+beginner: [
+{t:"Variables & Print",e:"A variable is a named box that holds a value.|Use = to assign a value: age = 20.|Choose short, descriptive names.|print() displays values on the screen.|You can change a variable's value at any time.",c:"name = 'Ada'\nage = 36\nprint(name, 'is', age)",q:"After x = 5 and then x = x + 2, what is x?",o:["5","7","52"],a:1},
+{t:"Strings",e:"A string is text wrapped in quotes.|Single or double quotes both work.|Strings have methods like upper() and lower().|len() counts the characters in a string.|Join text with + or use f-strings.",c:"word = 'python'\nprint(word.upper())\nprint(len(word))",q:"What does 'hi'.upper() return?",o:["hi","HI","Hi"],a:1},
+{t:"Lists",e:"A list stores many items in a fixed order.|Items are written inside square brackets.|Indexes start at 0, so the first item is [0].|append() adds an item to the end.|Lists can be changed after they are created.",c:"fruits = ['apple', 'mango']\nfruits.append('kiwi')\nprint(fruits[0], len(fruits))",q:"What is len([10, 20, 30])?",o:["2","3","30"],a:1},
+{t:"Dictionaries",e:"A dictionary stores key-value pairs.|Look up a value by its key, such as 'name'.|Keys are unique within one dictionary.|Great for structured data like a user profile.|Add or update with d['key'] = value.",c:"user = {'name': 'Ravi', 'score': 90}\nprint(user['score'])",q:"With d = {'a': 1}, what does d['a'] give?",o:["a","1","KeyError"],a:1},
+{t:"Conditions",e:"if runs code only when a condition is True.|elif checks another condition if the first fails.|else handles everything that did not match.|Comparisons use ==, !=, <, >, <=, >=.|Indentation marks the body of each block.",c:"score = 72\nif score >= 90:\n    print('A')\nelif score >= 70:\n    print('B')\nelse:\n    print('C')",q:"What prints when score = 72?",o:["A","B","C"],a:1},
+{t:"Loops",e:"for repeats code for each item in a sequence.|range(n) gives numbers from 0 to n-1.|while repeats as long as a condition is True.|break exits a loop early.|continue skips to the next repetition.",c:"for i in range(3):\n    print(i)",q:"How many numbers does range(3) produce?",o:["2","3","4"],a:1},
+{t:"Functions",e:"A function is a named, reusable block of code.|Define it with the def keyword and a colon.|Parameters receive inputs from the caller.|return sends a result back to the caller.|Call a function by writing its name with ().",c:"def add(a, b):\n    return a + b\n\nprint(add(2, 3))",q:"Which keyword defines a function?",o:["func","def","function"],a:1}
+],
+intermediate: [
+{t:"List Comprehensions",e:"A comprehension builds a list in one line.|Pattern: [expression for item in list].|An if clause at the end filters the items.|It is shorter and often faster than a loop.|Use it when the result is a new list.",c:"squares = [n * n for n in range(5)]\nprint(squares)",q:"What is [x * 2 for x in [1, 2]]?",o:["[2, 4]","[1, 2, 2]","[2, 2]"],a:0},
+{t:"Lambda, map & filter",e:"lambda creates a small anonymous function.|map() applies a function to every item.|filter() keeps only the items that pass a test.|Both return iterators, so wrap them in list().|Best for short, simple transformations.",c:"nums = [1, 2, 3, 4]\nevens = list(filter(lambda n: n % 2 == 0, nums))\nprint(evens)",q:"Which function keeps only items that pass a test?",o:["map","filter","sort"],a:1},
+{t:"Exceptions",e:"Errors are raised while a program runs.|try wraps code that might fail.|except handles a specific error type.|finally runs whether or not an error happened.|Catching errors keeps programs from crashing.",c:"try:\n    n = int('abc')\nexcept ValueError:\n    print('Not a number!')",q:"Which block runs when an error happens?",o:["try","except","finally"],a:1},
+{t:"File Handling",e:"Files are read or written with open().|Modes: 'r' reads, 'w' writes, 'a' appends.|The with statement closes the file automatically.|read() returns the whole content as text.|Handle missing-file errors gracefully.",c:"with open('notes.txt', 'w') as f:\n    f.write('Hello')",q:"Which mode opens a file for writing?",o:["'r'","'w'","'x'"],a:1},
+{t:"Modules & Packages",e:"A module is a Python file containing reusable code.|import brings a module into your program.|The standard library ships with Python.|A package is a folder of related modules.|Install third-party packages with pip.",c:"import math\nprint(math.sqrt(16))",q:"What does math.sqrt(16) return?",o:["4.0","8","256"],a:0},
+{t:"Classes & OOP",e:"A class is a blueprint for creating objects.|An object is an instance with its own data.|__init__ sets up a new object's attributes.|Methods are functions that belong to a class.|Inheritance lets one class reuse another's code.",c:"class Dog:\n    def __init__(self, name):\n        self.name = name\n    def bark(self):\n        return self.name + ' says woof'\n\nprint(Dog('Rex').bark())",q:"What is __init__ used for?",o:["Deleting objects","Setting up a new object","Printing"],a:1}
+],
+advanced: [
+{t:"Decorators",e:"A decorator wraps a function to extend its behaviour.|It is written with @ above the function.|Common uses: logging, timing, and access checks.|Functions are first-class objects in Python.|The wrapper calls the original and returns its result.",c:"def log(fn):\n    def wrap(*a):\n        print('calling', fn.__name__)\n        return fn(*a)\n    return wrap\n\n@log\ndef hi():\n    return 'hi'",q:"What does the @ syntax do?",o:["Comments out code","Applies a wrapper function","Imports a module"],a:1},
+{t:"Generators",e:"A generator produces values one at a time.|It is created by a function that uses yield.|It saves memory on very large sequences.|Values are computed only when requested.|next() pulls the next value from a generator.",c:"def count(n):\n    for i in range(n):\n        yield i\n\nprint(list(count(3)))",q:"What does yield do?",o:["Ends the program","Produces a value lazily","Raises an error"],a:1},
+{t:"Context Managers",e:"A context manager sets up and cleans up a resource.|It is used with the with statement.|Files and locks are common examples.|__enter__ and __exit__ define its behaviour.|@contextmanager builds one from a generator.",c:"from contextlib import contextmanager\n\n@contextmanager\ndef tag():\n    print('<b>')\n    yield\n    print('</b>')",q:"Which keyword enters a context manager?",o:["with","using","try"],a:0},
+{t:"Async / Await",e:"async def defines a coroutine.|await pauses until a slow task finishes.|Other tasks run while one is waiting.|Ideal for network calls and I/O-heavy work.|asyncio.run() starts the event loop.",c:"import asyncio\n\nasync def job(n):\n    await asyncio.sleep(1)\n    return n\n\nprint(asyncio.run(job(7)))",q:"What does await do?",o:["Pauses until a result is ready","Stops Python","Creates a class"],a:0},
+{t:"Type Hints",e:"Type hints annotate variables and functions.|Syntax looks like name: str and -> int.|Hints do not enforce types at runtime.|Tools like mypy check them before running.|They make large codebases easier to read.",c:"def greet(name: str, times: int = 1) -> str:\n    return ('Hi ' + name + '! ') * times",q:"What does -> str indicate?",o:["The return type","The argument type","A comment"],a:0},
+{t:"Testing with pytest",e:"Tests check that code behaves as expected.|pytest finds functions whose names start with test_.|assert states what must be true.|A failing test shows the exact values involved.|Run tests often to catch bugs early.",c:"def add(a, b):\n    return a + b\n\ndef test_add():\n    assert add(2, 3) == 5",q:"What makes pytest pick up a test?",o:["A test_ name prefix","A @test tag","The file name alone"],a:0}
+]
+},
+sql: {
+beginner: [
+{t:"SELECT & FROM",e:"SELECT picks the columns you want to see.|FROM names the table to read from.|* means all columns.|Results come back as a table of rows.|Every query usually ends with a semicolon.",c:"SELECT name, city\nFROM customers;",q:"Which clause picks the columns?",o:["FROM","SELECT","WHERE"],a:1},
+{t:"Filtering with WHERE",e:"WHERE keeps only the rows that match a condition.|Operators include =, <>, <, >, LIKE, IN and BETWEEN.|Text values go in single quotes.|AND and OR combine several conditions.|Rows that do not match are left out.",c:"SELECT name\nFROM customers\nWHERE city = 'Pune';",q:"Which clause filters rows?",o:["WHERE","GROUP","ORDER"],a:0},
+{t:"Sorting & Limiting",e:"ORDER BY sorts the result rows.|ASC is ascending and DESC is descending.|LIMIT restricts how many rows come back.|You can sort by more than one column.|Sorting happens after filtering.",c:"SELECT name, price\nFROM products\nORDER BY price DESC\nLIMIT 5;",q:"What does DESC mean?",o:["Descending","Distinct","Default"],a:0},
+{t:"INSERT, UPDATE, DELETE",e:"INSERT adds new rows to a table.|UPDATE changes existing rows.|DELETE removes rows from a table.|Always use WHERE with UPDATE and DELETE.|Without WHERE, every row is affected.",c:"INSERT INTO users (name) VALUES ('Mia');\nUPDATE users SET name = 'Maya' WHERE id = 1;\nDELETE FROM users WHERE id = 2;",q:"Which statement removes rows?",o:["REMOVE","DELETE","ERASE"],a:1},
+{t:"Aggregate Functions",e:"Aggregates summarize many rows into one value.|COUNT counts rows and SUM adds numbers.|AVG finds the average, MIN and MAX the extremes.|GROUP BY applies aggregates to each group.|Most aggregates ignore NULL values.",c:"SELECT COUNT(*) AS orders,\n       AVG(total) AS avg_total\nFROM orders;",q:"Which function counts rows?",o:["SUM","COUNT","AVG"],a:1},
+{t:"Creating Tables",e:"CREATE TABLE defines a new table.|Each column has a name and a data type.|PRIMARY KEY uniquely identifies each row.|NOT NULL requires a value in that column.|Constraints keep your data reliable.",c:"CREATE TABLE books (\n  id INT PRIMARY KEY,\n  title VARCHAR(100),\n  year INT\n);",q:"What does PRIMARY KEY guarantee?",o:["Values are unique and not null","Values are sorted","The column is optional"],a:0}
+],
+intermediate: [
+{t:"INNER JOIN",e:"JOIN combines rows from two related tables.|INNER JOIN keeps only the rows that match.|ON states which columns must match.|Table aliases like o and c shorten queries.|Rows without a match are excluded.",c:"SELECT o.id, c.name\nFROM orders o\nINNER JOIN customers c\n  ON o.customer_id = c.id;",q:"Which rows does INNER JOIN return?",o:["Only matching rows","All left rows","All rows"],a:0},
+{t:"LEFT JOIN",e:"LEFT JOIN keeps every row from the left table.|Unmatched right-side columns become NULL.|Useful for finding records with no related rows.|The order of the tables matters.|Filter for NULL to find the unmatched rows.",c:"SELECT c.name, o.id\nFROM customers c\nLEFT JOIN orders o\n  ON c.id = o.customer_id;",q:"Customers with no orders show what in order columns?",o:["They are dropped","NULL","An error"],a:1},
+{t:"GROUP BY & HAVING",e:"GROUP BY collects rows that share a value.|Aggregates like COUNT run for each group.|HAVING filters groups after aggregation.|WHERE filters rows before grouping.|Every selected column must be grouped or aggregated.",c:"SELECT city, COUNT(*) AS n\nFROM customers\nGROUP BY city\nHAVING COUNT(*) > 5;",q:"Which clause filters groups instead of rows?",o:["WHERE","HAVING","ORDER BY"],a:1},
+{t:"Subqueries",e:"A subquery is a query inside another query.|It can return one value, a list, or a table.|Wrap it in parentheses.|IN matches against a list of values.|A correlated subquery uses the outer query's rows.",c:"SELECT name\nFROM products\nWHERE price > (\n  SELECT AVG(price) FROM products\n);",q:"Where does a subquery usually sit?",o:["Inside another query","Only at the end","Outside SQL"],a:0},
+{t:"CASE Expressions",e:"CASE adds if/else logic inside a query.|WHEN sets a condition and THEN gives the result.|ELSE provides a fallback value.|END closes the expression.|Great for labels, buckets, and conditional totals.",c:"SELECT name,\n  CASE WHEN score >= 50 THEN 'Pass'\n       ELSE 'Fail' END AS result\nFROM students;",q:"What does ELSE provide in CASE?",o:["A default value","An error","A join"],a:0},
+{t:"UNION",e:"UNION combines the results of two queries.|Both queries must return the same number of columns.|Column types must be compatible.|UNION removes duplicate rows.|UNION ALL keeps duplicates and runs faster.",c:"SELECT city FROM customers\nUNION\nSELECT city FROM suppliers;",q:"Does UNION keep duplicate rows?",o:["Yes, always","No, it removes them","Only if sorted"],a:1}
+],
+advanced: [
+{t:"CTEs with WITH",e:"A CTE is a named temporary result created with WITH.|It makes complex queries easier to read.|Several CTEs can be chained with commas.|A CTE exists only for the query it belongs to.|It can be referenced more than once.",c:"WITH big_orders AS (\n  SELECT * FROM orders WHERE total > 500\n)\nSELECT customer_id, COUNT(*)\nFROM big_orders\nGROUP BY customer_id;",q:"Which keyword starts a CTE?",o:["WITH","TEMP","LET"],a:0},
+{t:"Window Functions",e:"Window functions calculate across related rows.|Unlike GROUP BY, the rows are not collapsed.|OVER defines the window of rows to use.|PARTITION BY splits rows into separate groups.|ROW_NUMBER, RANK and LAG are popular examples.",c:"SELECT name, dept, salary,\n  RANK() OVER (PARTITION BY dept\n               ORDER BY salary DESC) AS rnk\nFROM staff;",q:"What does PARTITION BY do here?",o:["Splits rows into groups for ranking","Deletes duplicates","Creates a table"],a:0},
+{t:"Transactions",e:"A transaction groups statements into one unit.|BEGIN starts it and COMMIT saves it.|ROLLBACK undoes everything since BEGIN.|Transactions keep data consistent when failures occur.|They follow ACID properties.",c:"BEGIN;\nUPDATE accounts SET bal = bal - 100 WHERE id = 1;\nUPDATE accounts SET bal = bal + 100 WHERE id = 2;\nCOMMIT;",q:"What undoes an unfinished transaction?",o:["ROLLBACK","UNDO","REVERT ALL"],a:0},
+{t:"Indexes & EXPLAIN",e:"An index is a lookup structure built on a column.|Indexes speed up searches but slow down writes.|EXPLAIN shows the plan the database will use.|Index columns used in WHERE and JOIN clauses.|Avoid over-indexing tables that change often.",c:"CREATE INDEX idx_email\n  ON users(email);\n\nEXPLAIN SELECT * FROM users\nWHERE email = 'a@b.com';",q:"What is an index mainly for?",o:["Faster lookups","Storing images","Renaming tables"],a:0},
+{t:"Views",e:"A view is a saved query that behaves like a table.|CREATE VIEW gives the query a name.|Views simplify complex logic you repeat often.|They can limit which columns users can see.|Data is read live from the underlying tables.",c:"CREATE VIEW active_users AS\nSELECT id, name FROM users\nWHERE active = 1;",q:"What is a view?",o:["A saved query","A backup file","A user role"],a:0},
+{t:"Recursive CTEs",e:"A recursive CTE refers to itself to repeat steps.|It has an anchor part and a recursive part.|UNION ALL joins the two parts together.|A stop condition prevents an infinite loop.|Perfect for trees, hierarchies, and sequences.",c:"WITH RECURSIVE nums AS (\n  SELECT 1 AS n\n  UNION ALL\n  SELECT n + 1 FROM nums WHERE n < 5\n)\nSELECT * FROM nums;",q:"What condition stops the recursion here?",o:["n < 5","n = 0","It never stops"],a:0}
+]
+}
+};
+
+const LANGS = {
+  python:{name:"🐍 Python",cls:"",desc:"Clean, readable, and used everywhere from web apps to AI."},
+  sql:{name:"🗄️ SQL",cls:"sq",desc:"The language of data. Ask questions of tables and get answers."}
+};
+const LEVELS = {
+  beginner:"Start from zero with short lessons and instant quizzes.",
+  intermediate:"Level up with real-world patterns and problem solving.",
+  advanced:"Master the tools professionals use every day."
+};
+const PARENT = {langs:"home", levels:"langs", topics:"levels", lesson:"topics"};
+
+let scr = "home", lang = "python", lvl = "beginner", cur = null, pts = 0;
+const done = new Set();
+
+const cap = s => s[0].toUpperCase() + s.slice(1);
+const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const $ = id => document.getElementById(id);
+const exList = e => `<ul class="ex">${e.split("|").map(l => `<li>${esc(l)}</li>`).join("")}</ul>`;
+const items = () => DATA[lang][lvl];
+const unlocked = i => i === 0 || done.has(lang+lvl+(i-1));
+const prog = (l, v) => DATA[l][v].filter((_, i) => done.has(l+v+i)).length;
+
+function go(s){ scr = s; render(); window.scrollTo(0, 0); }
+function goBack(){ go(PARENT[scr] || "home"); }
+
+function render(){
+  $("back").hidden = scr === "home";
+  $("xp").textContent = `⭐ ${pts} XP`;
+  $("title").textContent = {home:"Code Learner", langs:"Choose a language", levels:LANGS[lang].name, topics:`${LANGS[lang].name} · ${cap(lvl)}`, lesson:`Lesson ${cur+1}`}[scr];
+  ({home:homeV, langs:langsV, levels:levelsV, topics:topicsV, lesson:lessonV})[scr]();
+}
+
+let user = null;
+
+function homeV(){
+  $("app").innerHTML = `
+    <section class="auth">
+      <div class="logo-wrap">${LOGO}</div>
+      <h1 class="appname">Code Learner</h1>
+      <p class="sub">Create an account to start learning</p>
+      <form class="signup" onsubmit="signUp(event)">
+        <label>Email
+          <input id="em" type="email" autocomplete="email" placeholder="you@example.com" required>
+        </label>
+        <label>Password
+          <div class="pw">
+            <input id="pw" type="password" autocomplete="new-password" placeholder="At least 8 characters" oninput="meter()" required>
+            <button type="button" id="eye" onclick="togglePw()">Show</button>
+          </div>
+        </label>
+        <div class="meter"><i id="mt"></i></div>
+        <div class="hint" id="mtx">Use 8+ characters with letters and numbers</div>
+        <button class="start" type="submit">Create account</button>
+        <div class="msg" id="msg"></div>
+      </form>
+      <ol class="flow" id="flow"></ol>
+    </section>`;
+}
+
+function meter(){
+  const v = $("pw").value;
+  const s = (v.length >= 8) + (/[A-Za-z]/.test(v) && /\d/.test(v)) + (v.length >= 12 && /[^A-Za-z0-9]/.test(v));
+  $("mt").style.width = ["0%","35%","70%","100%"][s];
+  $("mt").style.background = ["#f87171","#fbbf24","#34d399","#22d3ee"][s];
+  $("mtx").textContent = ["Too short","Weak","Good","Strong"][s];
+}
+
+function togglePw(){
+  const p = $("pw");
+  p.type = p.type === "password" ? "text" : "password";
+  $("eye").textContent = p.type === "password" ? "Show" : "Hide";
+}
+
+function showFlow(text, note){
+  $("flow").insertAdjacentHTML("beforeend", `<li class="${note ? 'note' : ''}">${text}</li>`);
+}
+
+function signUp(ev){
+  ev.preventDefault();
+  const email = $("em").value.trim().toLowerCase();
+  const pw = $("pw").value;
+  $("flow").innerHTML = "";
+  $("msg").className = "msg";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { $("msg").className = "msg err"; $("msg").textContent = "Enter a valid email address."; return; }
+  if (pw.length < 8 || !/[A-Za-z]/.test(pw) || !/\d/.test(pw)) { $("msg").className = "msg err"; $("msg").textContent = "Password needs 8+ characters with letters and numbers."; return; }
+
+  showFlow("1. Browser checks the email format and password strength on this device.");
+  showFlow("2. The password is sent over HTTPS (encrypted in transit). It is never stored in the browser.");
+  showFlow("3. Server receives the email and password.");
+  showFlow("4. Server hashes the password with bcrypt, a one-way scramble. The plain password is discarded.");
+  showFlow("5. Server saves only the email and the hash in the users table.");
+  showFlow("6. Server confirms the account, and the password field is cleared.");
+  showFlow("Demo mode: nothing leaves this page. A live app needs a backend (Supabase, Firebase, or your own server).", true);
+
+  user = email;
+  $("pw").value = "";
+  $("mt").style.width = "0%";
+  $("mtx").textContent = "Use 8+ characters with letters and numbers";
+  $("msg").innerHTML = `✅ Account created for <b>${esc(email)}</b><br><button class="start" type="button" onclick="go('langs')">Continue →</button>`;
+}
+
+function langsV(){
+  $("app").innerHTML = `<div class="grid">${Object.keys(LANGS).map(k => {
+    const total = Object.values(DATA[k]).flat().length;
+    const d = Object.keys(LEVELS).reduce((s, v) => s + prog(k, v), 0);
+    return `<div class="tile ${LANGS[k].cls}" onclick="lang='${k}';go('levels')">
+      <h2>${LANGS[k].name}</h2><p>${LANGS[k].desc}</p>
+      <div class="prog">${d} of ${total} topics complete</div></div>`;
+  }).join("")}</div>`;
+}
+
+function levelsV(){
+  $("app").innerHTML = Object.keys(LEVELS).map(v => {
+    const total = DATA[lang][v].length;
+    return `<div class="lvl" onclick="lvl='${v}';go('topics')">
+      <div><b>${cap(v)}</b><span>${LEVELS[v]}</span><span>${prog(lang, v)} of ${total} complete</span></div>
+      <em>›</em></div>`;
+  }).join("");
+}
+
+function topicsV(){
+  const list = items(), d = prog(lang, lvl), pct = Math.round(d / list.length * 100);
+  $("app").innerHTML = `
+    <div class="hero ${LANGS[lang].cls}">
+      <h2>${cap(lvl)} topics</h2>
+      <p>Finish each topic to unlock the next one.</p>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <p>${d} of ${list.length} complete</p>
+    </div>
+    <div class="grid">${list.map((it, i) => {
+      const open = unlocked(i), fin = done.has(lang+lvl+i);
+      return `<div class="topic ${fin?"done":""} ${open?"":"locked"}" onclick="openLesson(${i})">
+        <div class="row"><div class="num">${fin?"✓":open?i+1:"🔒"}</div><b>${it.t}</b></div>
+        ${exList(it.e)}
+        ${open?"":'<span class="tag">🔒 Finish the previous topic to unlock</span>'}
+      </div>`;
+    }).join("")}</div>`;
+}
+
+function openLesson(i){ if (!unlocked(i)) return; cur = i; go("lesson"); }
+
+function lessonV(){
+  const L = items()[cur];
+  $("app").innerHTML = `
+    <div class="card">
+      <span class="pill">Lesson ${cur+1} of ${items().length}</span>
+      <h2>${L.t}</h2>
+      ${exList(L.e)}
+      <div class="pre">${esc(L.c)}</div>
+    </div>
+    <div class="card">
+      <h3>🧠 Quick quiz</h3>
+      <p>${L.q}</p>
+      ${L.o.map((o, j) => `<button class="opt" onclick="pick(${j})">${esc(o)}</button>`).join("")}
+      <div class="fb" id="fb"></div>
+      <button class="nextbtn" id="nx" onclick="next()">Next topic →</button>
+    </div>`;
+}
+
+function pick(j){
+  const key = lang+lvl+cur, L = items()[cur];
+  if ($("nx").style.display === "block") return;
+  const btns = document.querySelectorAll(".opt");
+  if (j !== L.a) {
+    btns[j].classList.add("bad"); btns[j].disabled = true;
+    $("fb").textContent = "Not quite. Try another option to finish this topic!";
+    return;
+  }
+  btns[L.a].classList.add("ok");
+  if (!done.has(key)) pts += 10;
+  done.add(key);
+  $("fb").textContent = "🎉 Correct! +10 XP";
+  $("nx").style.display = "block";
+  $("xp").textContent = `⭐ ${pts} XP`;
+}
+
+function next(){
+  if (cur < items().length - 1) { cur++; render(); window.scrollTo(0, 0); }
+  else go("topics");
+}
+
+render();
+</script>
+</body>
+</html>

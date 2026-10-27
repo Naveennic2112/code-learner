@@ -92,6 +92,7 @@ main{max-width:920px;margin:0 auto;padding:16px}
 .flow li.note{border-left-color:#fbbf24;color:#fde68a}
 footer{text-align:center;color:var(--mut);font-size:12px;padding:24px 16px 40px}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div id="top">
@@ -266,7 +267,7 @@ function showFlow(text, note){
   $("flow").insertAdjacentHTML("beforeend", `<li class="${note ? 'note' : ''}">${text}</li>`);
 }
 
-function signUp(ev){
+function signUpDemo(ev){
   ev.preventDefault();
   const email = $("em").value.trim().toLowerCase();
   const pw = $("pw").value;
@@ -288,6 +289,38 @@ function signUp(ev){
   $("mt").style.width = "0%";
   $("mtx").textContent = "Use 8+ characters with letters and numbers";
   $("msg").innerHTML = `✅ Account created for <b>${esc(email)}</b><br><button class="start" type="button" onclick="go('langs')">Continue →</button>`;
+}
+
+const sb = supabase.createClient("https://lhkcnsfgdqneyaddbddj.supabase.co", "sb_publishable_VLa4qwNJstN-NJi4fhP60A_20iMl8sQ");
+
+async function signUp(ev){
+  ev.preventDefault();
+  const email = $("em").value.trim().toLowerCase();
+  const pw = $("pw").value;
+  $("flow").innerHTML = "";
+  $("msg").className = "msg";
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    $("msg").className = "msg err"; $("msg").textContent = "Enter a valid email address."; return;
+  }
+  if (pw.length < 8 || !/[A-Za-z]/.test(pw) || !/\d/.test(pw)) {
+    $("msg").className = "msg err"; $("msg").textContent = "Password needs 8+ characters with letters and numbers."; return;
+  }
+
+  $("msg").textContent = "Creating your account...";
+  const { error } = await sb.auth.signUp({ email, password: pw });
+
+  if (error) {
+    $("msg").className = "msg err";
+    $("msg").textContent = error.message;
+    return;
+  }
+
+  user = email;
+  $("pw").value = "";
+  $("mt").style.width = "0%";
+  $("mtx").textContent = "Use 8+ characters with letters and numbers";
+  $("msg").innerHTML = `✅ Account created for <b>${esc(email)}</b>. Check your inbox to confirm your email, then continue.<br><button class="start" type="button" onclick="go('langs')">Continue →</button>`;
 }
 
 function langsV(){

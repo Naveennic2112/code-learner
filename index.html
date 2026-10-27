@@ -90,6 +90,9 @@ main{max-width:920px;margin:0 auto;padding:16px}
 .flow{list-style:none;padding:0;margin:14px 0 0;width:100%;max-width:420px;text-align:left;font-size:13px;color:var(--mut)}
 .flow li{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--a);border-radius:10px;padding:9px 12px;margin-bottom:8px;line-height:1.45}
 .flow li.note{border-left-color:#fbbf24;color:#fde68a}
+.tabs{display:flex;background:#0f1526;border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:6px}
+.tab{flex:1;border:0;background:none;color:var(--mut);font-weight:700;font-size:14px;padding:10px;border-radius:9px;cursor:pointer}
+.tab.on{background:var(--a);color:#fff}
 footer{text-align:center;color:var(--mut);font-size:12px;padding:24px 16px 40px}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -224,7 +227,7 @@ function render(){
 
 let user = null;
 
-function homeV(){
+function homeVOld(){
   $("app").innerHTML = `
     <section class="auth">
       <div class="logo-wrap">${LOGO}</div>
@@ -292,6 +295,94 @@ function signUpDemo(ev){
 }
 
 const sb = supabase.createClient("https://lhkcnsfgdqneyaddbddj.supabase.co", "sb_publishable_VLa4qwNJstN-NJi4fhP60A_20iMl8sQ");
+
+let authMode = "signin";
+
+function homeV(){
+  $("app").innerHTML = `
+    <section class="auth">
+      <div class="logo-wrap">${LOGO}</div>
+      <h1 class="appname">Code Learner</h1>
+      <p class="sub" id="sub">Sign in to continue learning</p>
+      <div class="signup">
+        <div class="tabs">
+          <button type="button" class="tab on" id="t-in" onclick="setMode('signin')">Sign in</button>
+          <button type="button" class="tab" id="t-up" onclick="setMode('signup')">Create account</button>
+        </div>
+        <form onsubmit="authSubmit(event)">
+          <label>Email
+            <input id="em" type="email" autocomplete="email" placeholder="you@example.com" required>
+          </label>
+          <label>Password
+            <div class="pw">
+              <input id="pw" type="password" autocomplete="current-password" placeholder="Your password" oninput="meter()" required>
+              <button type="button" id="eye" onclick="togglePw()">Show</button>
+            </div>
+          </label>
+          <div id="meterBox" style="display:none">
+            <div class="meter"><i id="mt"></i></div>
+            <div class="hint" id="mtx">Use 8+ characters with letters and numbers</div>
+          </div>
+          <button class="start" type="submit" id="submitBtn">Sign in</button>
+          <div class="msg" id="msg"></div>
+        </form>
+      </div>
+      <ol class="flow" id="flow"></ol>
+    </section>`;
+}
+
+function setMode(m){
+  authMode = m;
+  const up = m === "signup";
+  $("t-in").classList.toggle("on", !up);
+  $("t-up").classList.toggle("on", up);
+  $("submitBtn").textContent = up ? "Create account" : "Sign in";
+  $("sub").textContent = up ? "Create an account to start learning" : "Sign in to continue learning";
+  $("meterBox").style.display = up ? "block" : "none";
+  $("pw").autocomplete = up ? "new-password" : "current-password";
+  $("pw").placeholder = up ? "At least 8 characters" : "Your password";
+  $("msg").className = "msg";
+  $("msg").textContent = "";
+  $("flow").innerHTML = "";
+}
+
+function authSubmit(ev){
+  ev.preventDefault();
+  return authMode === "signup" ? signUp(ev) : signIn(ev);
+}
+
+function authErr(text, offerSignup){
+  $("msg").className = "msg err";
+  $("msg").innerHTML = esc(text) + (offerSignup
+    ? `<br><button type="button" class="start" style="margin-top:10px" onclick="setMode('signup')">Create an account</button>`
+    : "");
+}
+
+async function signIn(ev){
+  const email = $("em").value.trim().toLowerCase();
+  const pw = $("pw").value;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { authErr("Enter a valid email address."); return; }
+  if (!pw) { authErr("Enter your password."); return; }
+
+  $("msg").className = "msg";
+  $("msg").textContent = "Signing you in...";
+  const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+
+  if (error) {
+    // Supabase gives the same message for a wrong password and an unknown email,
+    // so we offer account creation whenever sign-in fails.
+    if (error.message.toLowerCase().includes("not confirmed")) {
+      authErr("Please confirm your email first. Check your inbox for the link.");
+    } else {
+      authErr("Email or password is incorrect. If you are new here, create an account.", true);
+    }
+    return;
+  }
+
+  user = email;
+  $("pw").value = "";
+  go("langs");
+}
 
 async function signUp(ev){
   ev.preventDefault();
@@ -407,3 +498,4 @@ render();
 </script>
 </body>
 </html>
+
